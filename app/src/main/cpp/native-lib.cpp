@@ -114,6 +114,7 @@ void child_listen_msg() {
 
         if (r > 0) {
 
+            char pkg[256] = {0};
             // 保证所读到的消息是指定  apk客户端的
             if (FD_ISSET(m_child, &rfds)) {
 
