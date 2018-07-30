@@ -28,7 +28,7 @@ Java_nova_android_socketprocessdemo_Watcher_createWatcher(JNIEnv *env, jobject i
     env->ReleaseStringUTFChars(userId_, userId);
 }
 
-const char *PATH = "/dat/data/nova.android.socketprocessdemo/my.sock";
+const char *PATH = "/data/data/nova.android.socketprocessdemo/my.sock";
 int m_child;
 
 /**
