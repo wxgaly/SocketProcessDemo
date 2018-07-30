@@ -8,6 +8,14 @@ package nova.android.socketprocessdemo;
  */
 public class Watcher {
 
+    static {
+        System.loadLibrary("native-lib");
+    }
+
+    public native String stringFromJNI();
+
     public native void createWatcher(String userId);
+
+    public native void connectMonitor();
 
 }

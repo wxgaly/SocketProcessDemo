@@ -3,17 +3,13 @@
 #include "native_lib.h"
 
 
-extern "C" JNIEXPORT jstring JNICALL
-Java_nova_android_socketprocessdemo_MainActivity_stringFromJNI(
-        JNIEnv *env,
-        jobject /* this */) {
-    std::string hello = "Hello from C++";
-    return env->NewStringUTF(hello.c_str());
-}
+const char *userId;
+
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_nova_android_socketprocessdemo_Watcher_createWatcher(JNIEnv *env, jobject instance, jstring userId_) {
-    const char *userId = env->GetStringUTFChars(userId_, 0);
+    userId = env->GetStringUTFChars(userId_, 0);
 
     //开双进程
     pid_t pid = fork();
@@ -43,6 +39,7 @@ int m_child;
 int child_create_channel() {
 
     int listenfd = socket(AF_LOCAL, SOCK_STREAM, 0);
+    unlink(PATH);
 
     struct sockaddr_un addr;
 
@@ -114,13 +111,67 @@ void child_listen_msg() {
 
         if (r > 0) {
 
+            //缓冲区
             char pkg[256] = {0};
             // 保证所读到的消息是指定  apk客户端的
             if (FD_ISSET(m_child, &rfds)) {
+                //阻塞式函数
+                int result = read(m_child, pkg, sizeof(pkg));
 
+                //开启服务
+                execlp("am", "am", "startservice", "--user", userId, "nova.android.socketprocessdemo/nova.android"
+                        ".socketprocessdemo.ProcessService", (char *) NULL);
+                break;
             }
         }
 
     }
 
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_nova_android_socketprocessdemo_Watcher_connectMonitor(JNIEnv *env, jobject instance) {
+
+    int socked;
+    struct sockaddr_un addr;
+
+    while (1) {
+
+        LOGE("客户端 父进程开始连接");
+
+        socked = socket(AF_LOCAL, SOCK_STREAM, 0);
+
+        if (socked < 0) {
+            LOGE("连接失败");
+            return;
+        }
+
+
+        //清空内存
+        memset(&addr, 0, sizeof(sockaddr_un));
+
+        addr.sun_family = AF_LOCAL;
+        strcpy(addr.sun_path, PATH);
+
+        if (connect(socked, reinterpret_cast<const sockaddr *>(&addr), sizeof(sockaddr_un)) < 0) {
+            LOGE("连接失败");
+            close(socked);
+            sleep(1);
+            continue;
+
+        }
+
+        LOGE("连接成功");
+
+        break;
+
+    }
+
+}extern "C"
+JNIEXPORT jstring JNICALL
+Java_nova_android_socketprocessdemo_Watcher_stringFromJNI(JNIEnv *env, jobject instance) {
+
+    std::string hello = "Hello from C++";
+    return env->NewStringUTF(hello.c_str());
 }

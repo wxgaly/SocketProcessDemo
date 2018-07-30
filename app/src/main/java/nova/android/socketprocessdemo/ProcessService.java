@@ -34,6 +34,7 @@ public class ProcessService extends Service {
         super.onCreate();
         Watcher watcher = new Watcher();
         watcher.createWatcher(String.valueOf(Process.myUid()));
+        watcher.connectMonitor();
 
         Timer timer = new Timer();
 
