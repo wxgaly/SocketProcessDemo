@@ -51,7 +51,7 @@ int child_create_channel() {
 
     int connfd = 0;
 
-    if (bind(listenfd, reinterpret_cast<const sockaddr *>(&addr), sizeof(sockaddr_un)) < 0) {
+    if (bind(listenfd, (sockaddr *) (&addr), sizeof(sockaddr_un)) < 0) {
         LOGE("绑定错误");
         return 0;
     }
@@ -154,7 +154,7 @@ Java_nova_android_socketprocessdemo_Watcher_connectMonitor(JNIEnv *env, jobject 
         addr.sun_family = AF_LOCAL;
         strcpy(addr.sun_path, PATH);
 
-        if (connect(socked, reinterpret_cast<const sockaddr *>(&addr), sizeof(sockaddr_un)) < 0) {
+        if (connect(socked, (sockaddr *) (&addr), sizeof(sockaddr_un)) < 0) {
             LOGE("连接失败");
             close(socked);
             sleep(1);
@@ -168,7 +168,9 @@ Java_nova_android_socketprocessdemo_Watcher_connectMonitor(JNIEnv *env, jobject 
 
     }
 
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT jstring JNICALL
 Java_nova_android_socketprocessdemo_Watcher_stringFromJNI(JNIEnv *env, jobject instance) {
 
